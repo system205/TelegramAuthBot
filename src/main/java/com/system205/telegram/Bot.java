@@ -4,24 +4,38 @@ package com.system205.telegram;
 import com.system205.entity.*;
 import com.system205.service.*;
 import com.system205.telegram.exceptions.*;
+import jakarta.annotation.*;
 import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.stereotype.*;
 import org.telegram.telegrambots.bots.*;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.exceptions.*;
 
 @Component
 @Slf4j
 public final class Bot extends TelegramLongPollingBot {
     private final TelegramUserService service;
+    private Long botId;
 
     @Autowired
     public Bot(@Value("${bot.token}") String botToken, TelegramUserService service) {
         super(botToken);
         this.service = service;
         log.info("Bot initialized");
+    }
+
+    @PostConstruct
+    private void init(){
+        try {
+            this.botId = getMe().getId();
+        } catch (TelegramApiException e) {
+            log.error("Can't call getMe()", e);
+        }
+
+        log.info("Bot id - {}", this.botId);
     }
 
     @Override
@@ -35,6 +49,20 @@ public final class Bot extends TelegramLongPollingBot {
                 processStartMessage(message);
             }
 
+        } else if (update.hasMyChatMember()) {
+            ChatMemberUpdated myChatMember = update.getMyChatMember();
+            Long userId = myChatMember.getFrom().getId();
+            handleNewUserStatus(myChatMember, userId);
+        }
+    }
+
+    private void handleNewUserStatus(ChatMemberUpdated myChatMember, Long userId) {
+        ChatMember newChatMember = myChatMember.getNewChatMember();
+        if (newChatMember.getUser().getId().equals(this.botId)) {
+            if (newChatMember.getStatus().equals("kicked"))
+                service.blockUser(userId);
+            else if (newChatMember.getStatus().equals("member"))
+                service.unblockUser(userId);
         }
     }
 

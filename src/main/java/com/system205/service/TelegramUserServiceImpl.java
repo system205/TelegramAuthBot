@@ -3,11 +3,13 @@ package com.system205.service;
 import com.system205.entity.*;
 import com.system205.repository.*;
 import lombok.*;
+import lombok.extern.slf4j.*;
 import org.springframework.stereotype.*;
 
 import java.util.*;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public final class TelegramUserServiceImpl implements TelegramUserService {
 
@@ -19,8 +21,22 @@ public final class TelegramUserServiceImpl implements TelegramUserService {
 
         if (optionalUser.isPresent()) return false;
 
-        repository.save(telegramUser);
+        TelegramUser user = repository.save(telegramUser);
+
+        log.info("User[{}] {} was saved", user.getId(), user.getUserName());
 
         return true;
+    }
+
+    @Override
+    public void blockUser(Long userId) {
+        repository.blockUserById(userId);
+        log.info("User[{}] was blocked", userId);
+    }
+
+    @Override
+    public void unblockUser(Long userId) {
+        repository.unblockUserById(userId);
+        log.info("User[{}] was unblocked", userId);
     }
 }
