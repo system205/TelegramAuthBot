@@ -5,8 +5,11 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.*;
 import org.springframework.transaction.annotation.*;
 
+import java.util.*;
+
 @Repository
 public interface TelegramUserRepository extends JpaRepository<TelegramUser, Long> {
+    List<TelegramUser> findByBlockedFalse();
     @Transactional
     @Modifying
     @Query("update TelegramUser t set t.blocked = false where t.id = ?1")

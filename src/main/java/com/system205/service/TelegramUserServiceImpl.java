@@ -39,4 +39,14 @@ public final class TelegramUserServiceImpl implements TelegramUserService {
         repository.unblockUserById(userId);
         log.info("User[{}] was unblocked", userId);
     }
+
+    @Override
+    public List<TelegramUser> findAccessibleUsers() {
+        return repository.findByBlockedFalse();
+    }
+
+    @Override
+    public void updateUser(TelegramUser updatedUser) {
+        repository.save(updatedUser);
+    }
 }

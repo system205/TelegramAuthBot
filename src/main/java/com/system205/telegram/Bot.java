@@ -7,15 +7,20 @@ import com.system205.telegram.exceptions.*;
 import jakarta.annotation.*;
 import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.*;
 import org.telegram.telegrambots.bots.*;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.*;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.chatmember.*;
 import org.telegram.telegrambots.meta.exceptions.*;
 
+import java.util.*;
+
 @Component
 @Slf4j
+@EnableScheduling
 public final class Bot extends TelegramLongPollingBot {
     private final TelegramUserService service;
     private Long botId;
@@ -28,7 +33,7 @@ public final class Bot extends TelegramLongPollingBot {
     }
 
     @PostConstruct
-    private void init(){
+    private void init() {
         try {
             this.botId = getMe().getId();
         } catch (TelegramApiException e) {
@@ -80,6 +85,19 @@ public final class Bot extends TelegramLongPollingBot {
         log.debug("Message[{}]: '{}' sent to chat {}", sentMessage.getMessageId(), sentMessage.getText(), sentMessage.getChatId());
     }
 
+    @Scheduled(fixedRateString = "${bot.update.rate}", initialDelayString = "${bot.update.initial-delay}")
+    private void updateTelegramUsers() {
+        List<TelegramUser> users = service.findAccessibleUsers();
+        log.debug("Start checking {} users on updates", users.size());
+        for (TelegramUser user : users) {
+            TelegramUser updatedUser = getTelegramUserById(user.getId());
+            if (!user.equals(updatedUser)) {
+                service.updateUser(updatedUser);
+                log.info("User[{}] was updated. Before: {}. After: {}", user.getId(), user, updatedUser);
+            }
+        }
+    }
+
     private Message sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage(String.valueOf(chatId), text);
         try {
@@ -89,6 +107,16 @@ public final class Bot extends TelegramLongPollingBot {
             throw new SendMessageException("Can't send a message", exception);
         }
 
+    }
+
+    private TelegramUser getTelegramUserById(long chatId) {
+        try {
+            Chat chat = execute(new GetChat(String.valueOf(chatId)));
+            return TelegramUser.from(chat);
+        } catch (TelegramApiException e) {
+            log.warn("Can't retrieve telegram user from chat {}", chatId);
+            throw new IllegalArgumentException("Can't get telegram user by chatId " + chatId);
+        }
     }
 
     @Override

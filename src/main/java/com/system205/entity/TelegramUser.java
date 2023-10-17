@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.telegram.telegrambots.meta.api.objects.*;
 
+import java.util.*;
+
 @Entity
 @Getter
 @Setter
@@ -36,5 +38,31 @@ public final class TelegramUser {
 
     public static TelegramUser from(User user) {
         return new TelegramUser(user.getId(), user.getFirstName(), user.getLastName(), user.getUserName());
+    }
+
+    public static TelegramUser from(Chat chat) {
+        return new TelegramUser(chat.getId(), chat.getFirstName(), chat.getLastName(), chat.getUserName());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TelegramUser that = (TelegramUser) o;
+
+        if (!id.equals(that.id)) return false;
+        if (!Objects.equals(firstName, that.firstName)) return false;
+        if (!Objects.equals(lastName, that.lastName)) return false;
+        return userName.equals(that.userName);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
+        result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+        result = 31 * result + userName.hashCode();
+        return result;
     }
 }
