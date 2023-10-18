@@ -45,6 +45,10 @@
             <artifactId>telegrambots</artifactId>
             <version>6.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -59,6 +63,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <mainClass>com.system205.TelegramAuthBotApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
