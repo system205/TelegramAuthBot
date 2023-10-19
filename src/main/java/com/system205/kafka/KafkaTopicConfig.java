@@ -1,13 +1,12 @@
 package com.system205.kafka;
 
-import com.system205.entity.*;
+import com.system205.telegram.dto.*;
 import lombok.extern.slf4j.*;
 import org.apache.kafka.clients.admin.*;
 import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.annotation.*;
 import org.springframework.kafka.config.*;
-import org.springframework.messaging.handler.annotation.*;
 
 @Configuration
 @ConditionalOnProperty(prefix = "telegram.kafka", name = "enabled", havingValue = "true")
@@ -15,11 +14,11 @@ import org.springframework.messaging.handler.annotation.*;
 public class KafkaTopicConfig {
     @Bean
     public NewTopic telegramTopic(){
-        return TopicBuilder.name("telegram").build();
+        return TopicBuilder.name("telegramUserUpdate").build();
     }
 
-    @KafkaListener(topics = {"telegram"}, id = "telegram")
-    void listener(@Payload TelegramUser data) {
-        log.info("READ: {}", data);
+    @KafkaListener(topics = {"telegramUserUpdate"}, id = "telegramLogger")
+    void listener(TelegramUserUpdate data) {
+        log.info("New telegram user update in kafka: {}", data);
     }
 }

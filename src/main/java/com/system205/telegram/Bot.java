@@ -3,11 +3,13 @@ package com.system205.telegram;
 
 import com.system205.entity.*;
 import com.system205.service.*;
+import com.system205.telegram.dto.*;
 import com.system205.telegram.exceptions.*;
 import com.system205.telegram.message.*;
 import jakarta.annotation.*;
 import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
+import org.springframework.kafka.core.*;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.*;
 import org.telegram.telegrambots.bots.*;
@@ -25,14 +27,18 @@ import java.util.*;
 public final class Bot extends TelegramLongPollingBot {
     private final TelegramUserService service;
     private final List<MessageProcessor> processors;
+    private final KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate;
     private Long botId;
+    @Value("${telegram.kafka.enabled:false}")
+    private boolean kafkaEnabled;
 
 
     @Autowired
-    public Bot(@Value("${bot.token}") String botToken, TelegramUserService service, List<MessageProcessor> processors) {
+    public Bot(@Value("${bot.token}") String botToken, TelegramUserService service, List<MessageProcessor> processors, KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate) {
         super(botToken);
         this.service = service;
         this.processors = processors;
+        this.kafkaTemplate = kafkaTemplate;
         log.info("Bot initialized. {} message processors were injected", processors.size());
     }
 
@@ -66,6 +72,11 @@ public final class Bot extends TelegramLongPollingBot {
         }
     }
 
+    private void sendToKafka(TelegramUserUpdate telegramUserUpdate) {
+        if (kafkaEnabled)
+            kafkaTemplate.send("telegramUserUpdate", telegramUserUpdate);
+    }
+
     private void handleNewUserStatus(ChatMemberUpdated myChatMember, Long userId) {
         ChatMember newChatMember = myChatMember.getNewChatMember();
         if (newChatMember.getUser().getId().equals(this.botId)) {
@@ -80,11 +91,15 @@ public final class Bot extends TelegramLongPollingBot {
     private void updateTelegramUsers() {
         List<TelegramUser> users = service.findAccessibleUsers();
         log.debug("Start checking {} users on updates", users.size());
+
         for (TelegramUser user : users) {
             TelegramUser updatedUser = getTelegramUserById(user.getId());
-            if (!user.equals(updatedUser)) {
-                service.updateUser(updatedUser);
+            if (!user.equals(updatedUser)) { // User has changed
+                service.updateUser(updatedUser); // Save new updated info
                 log.info("User[{}] was updated. Before: {}. After: {}", user.getId(), user, updatedUser);
+
+                // Send update message to kafka
+                sendToKafka(new TelegramUserUpdate(user, updatedUser));
             }
         }
     }
