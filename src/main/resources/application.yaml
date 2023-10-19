@@ -10,12 +10,14 @@ telegram:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:telegram_user
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
+    url: jdbc:postgresql://localhost:5432/telegram
+    username: telegram_bot
+    password: telegram_bot
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update # + create schema
+    show-sql: false
+
 
   kafka:
     bootstrap-servers: localhost:9092
