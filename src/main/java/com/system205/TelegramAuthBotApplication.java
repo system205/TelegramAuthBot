@@ -4,6 +4,7 @@ import com.system205.entity.*;
 import lombok.extern.slf4j.*;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.context.*;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.core.*;
@@ -30,6 +31,7 @@ public class TelegramAuthBotApplication {
     }
 
     @Bean
+    @ConditionalOnBean(type = {"com.system205.kafka.KafkaTopicConfig"})
     CommandLineRunner commandLineRunner(KafkaTemplate<String, TelegramUser> kafkaTemplate) {
         return args -> {
             TelegramUser user = new TelegramUser(1L, "name", null, "username");

@@ -4,6 +4,10 @@ bot:
     rate: 3600000 # An hour
     initial-delay: 600000 # 10 minutes
 
+telegram:
+  kafka:
+    enabled: false
+
 spring:
   datasource:
     url: jdbc:h2:mem:telegram_user
@@ -15,6 +19,7 @@ spring:
 
   kafka:
     bootstrap-servers: localhost:9092
+
     consumer:
       auto-offset-reset: earliest
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
