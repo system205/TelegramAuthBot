@@ -2,6 +2,7 @@ package com.system205.telegram;
 
 
 import com.system205.entity.*;
+import com.system205.kafka.*;
 import com.system205.service.*;
 import com.system205.telegram.dto.*;
 import com.system205.telegram.exceptions.*;
@@ -9,7 +10,6 @@ import com.system205.telegram.message.*;
 import jakarta.annotation.*;
 import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.kafka.core.*;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.*;
 import org.telegram.telegrambots.bots.*;
@@ -27,18 +27,16 @@ import java.util.*;
 public final class Bot extends TelegramLongPollingBot {
     private final TelegramUserService service;
     private final List<MessageProcessor> processors;
-    private final KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate;
+    private final KafkaService kafka;
     private Long botId;
-    @Value("${telegram.kafka.enabled:false}")
-    private boolean kafkaEnabled;
 
 
     @Autowired
-    public Bot(@Value("${bot.token}") String botToken, TelegramUserService service, List<MessageProcessor> processors, KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate) {
+    public Bot(@Value("${bot.token}") String botToken, TelegramUserService service, List<MessageProcessor> processors, KafkaService kafka) {
         super(botToken);
         this.service = service;
         this.processors = processors;
-        this.kafkaTemplate = kafkaTemplate;
+        this.kafka = kafka;
         log.info("Bot initialized. {} message processors were injected", processors.size());
     }
 
@@ -72,11 +70,6 @@ public final class Bot extends TelegramLongPollingBot {
         }
     }
 
-    private void sendToKafka(TelegramUserUpdate telegramUserUpdate) {
-        if (kafkaEnabled)
-            kafkaTemplate.send("telegramUserUpdate", telegramUserUpdate);
-    }
-
     private void handleNewUserStatus(ChatMemberUpdated myChatMember, Long userId) {
         ChatMember newChatMember = myChatMember.getNewChatMember();
         if (newChatMember.getUser().getId().equals(this.botId)) {
@@ -99,17 +92,16 @@ public final class Bot extends TelegramLongPollingBot {
                 log.info("User[{}] was updated. Before: {}. After: {}", user.getId(), user, updatedUser);
 
                 // Send update message to kafka
-                sendToKafka(new TelegramUserUpdate(user, updatedUser));
+                kafka.send(new TelegramUserUpdate(user, updatedUser));
             }
         }
     }
 
-    private Message sendMessage(long chatId, String text) {
+    private void sendMessage(long chatId, String text) {
         SendMessage message = new SendMessage(String.valueOf(chatId), text);
         try {
             Message sentMessage = execute(message);
             log.debug("Message[{}]: '{}' sent to chat {}", sentMessage.getMessageId(), sentMessage.getText(), sentMessage.getChatId());
-            return sentMessage;
         } catch (TelegramApiException exception) {
             log.error("Can't send a message '{}' to chat with id {}", text, chatId, exception);
             throw new SendMessageException("Can't send a message", exception);
