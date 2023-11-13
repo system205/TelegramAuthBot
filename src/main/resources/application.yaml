@@ -11,17 +11,14 @@ telegram:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/telegram
-    username: telegram_bot
-    password: telegram_bot
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update # + create schema
     show-sql: false
-
-
   kafka:
     bootstrap-servers: localhost:9092
-
     consumer:
       auto-offset-reset: earliest
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -29,8 +26,7 @@ spring:
         spring:
           json:
             type:
-              mapping: telegramUser:com.system205.entity.TelegramUser
-
+              mapping: telegramUser:com.system205.entity.TelegramUser, telegramUserUpdate:com.system205.telegram.dto.TelegramUserUpdate
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
