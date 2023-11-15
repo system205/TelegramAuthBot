@@ -1,5 +1,7 @@
 package com.system205.telegram.util;
 
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+
 public final class Utils {
     private Utils(){}
 

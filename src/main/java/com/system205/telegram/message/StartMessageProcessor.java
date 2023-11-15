@@ -25,13 +25,20 @@ public class StartMessageProcessor implements MessageProcessor{
 
         boolean registered = service.registerUser(telegramUser);
 
-        String welcomeText;
+        String registrationText;
         if (registered) {
-            welcomeText = "You're successfully registered!";
+            registrationText = "You're successfully registered!";
             kafka.send(new TelegramUserUpdate(telegramUser, telegramUser));
         }
-        else welcomeText = "You have already registered";
+        else registrationText = "You have already registered";
 
-        return Optional.of(welcomeText);
+
+        String responseText = String.format("""
+            Hi, %s! %s
+            
+            You can use:
+            /get_password - to /*sign/* in on the website
+            /start - to see this message""", telegramUser.getFirstName(), registrationText);
+        return Optional.of(responseText);
     }
 }
