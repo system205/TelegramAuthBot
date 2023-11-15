@@ -7,6 +7,7 @@ import com.system205.service.*;
 import com.system205.telegram.dto.*;
 import com.system205.telegram.exceptions.*;
 import com.system205.telegram.message.*;
+import com.system205.telegram.util.*;
 import jakarta.annotation.*;
 import lombok.extern.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
@@ -25,6 +26,7 @@ import java.util.*;
 @Slf4j
 @EnableScheduling
 public final class Bot extends TelegramLongPollingBot {
+    private static final String MARKDOWN = "MarkdownV2";
     private final TelegramUserService service;
     private final List<MessageProcessor> processors;
     private final KafkaService kafka;
@@ -98,7 +100,9 @@ public final class Bot extends TelegramLongPollingBot {
     }
 
     private void sendMessage(long chatId, String text) {
-        SendMessage message = new SendMessage(String.valueOf(chatId), text);
+        SendMessage message = new SendMessage(String.valueOf(chatId),
+            Utils.markdownEscapeCleaner(text));
+        message.setParseMode(MARKDOWN);
         try {
             Message sentMessage = execute(message);
             log.debug("Message[{}]: '{}' sent to chat {}", sentMessage.getMessageId(), sentMessage.getText(), sentMessage.getChatId());
