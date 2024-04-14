@@ -1,19 +1,19 @@
 package com.system205.kafka;
 
-import com.system205.telegram.dto.*;
-import lombok.*;
-import lombok.extern.slf4j.*;
+import com.system205.telegram.dto.TelegramUserUpdate;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.*;
-import org.springframework.stereotype.*;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class KafkaService {
+    private final KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate;
     @Value("${telegram.kafka.enabled:false}")
     private boolean kafkaEnabled;
-    private final KafkaTemplate<String, TelegramUserUpdate> kafkaTemplate;
 
     public void send(TelegramUserUpdate telegramUserUpdate) {
         if (kafkaEnabled)

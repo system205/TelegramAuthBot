@@ -1,19 +1,20 @@
 package com.system205.kafka;
 
-import com.system205.telegram.dto.*;
-import lombok.extern.slf4j.*;
-import org.apache.kafka.clients.admin.*;
-import org.springframework.boot.autoconfigure.condition.*;
-import org.springframework.context.annotation.*;
-import org.springframework.kafka.annotation.*;
-import org.springframework.kafka.config.*;
+import com.system205.telegram.dto.TelegramUserUpdate;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.config.TopicBuilder;
 
+@Slf4j
 @Configuration
 @ConditionalOnProperty(prefix = "telegram.kafka", name = "enabled", havingValue = "true")
-@Slf4j
 public class KafkaTopicConfig {
     @Bean
-    public NewTopic telegramTopic(){
+    public NewTopic telegramTopic() {
         return TopicBuilder.name("telegramUserUpdate").build();
     }
 

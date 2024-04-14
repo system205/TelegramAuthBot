@@ -11,7 +11,7 @@ services:
       telegram.kafka.enabled: true
       web-client.base-url: "http://host.docker.internal:8080"
     env_file:
-      - bot.env
+      - .env
 
   postgresql-db:
     container_name: postgresql-db
@@ -20,13 +20,13 @@ services:
     environment:
       POSTGRES_DB: telegram
     env_file:
-      - db.env
+      - .env
     volumes:
       - postgres-volume:/var/lib/postgresql/data
 
   kafka:
     container_name: kafka
-    image: docker.io/bitnami/kafka:3.6
+    image: bitnami/kafka:latest
     environment:
       # KRaft settings
       KAFKA_CFG_NODE_ID: 0

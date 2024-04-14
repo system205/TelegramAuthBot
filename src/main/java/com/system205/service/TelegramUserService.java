@@ -1,9 +1,9 @@
 package com.system205.service;
 
 
-import com.system205.entity.*;
+import com.system205.entity.TelegramUser;
 
-import java.util.*;
+import java.util.List;
 
 public interface TelegramUserService {
     boolean registerUser(TelegramUser telegramUser);

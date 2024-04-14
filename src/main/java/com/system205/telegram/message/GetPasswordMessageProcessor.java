@@ -1,19 +1,20 @@
 package com.system205.telegram.message;
 
-import com.system205.entity.*;
-import com.system205.telegram.dto.*;
-import lombok.extern.slf4j.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.http.*;
-import org.springframework.stereotype.*;
-import org.springframework.web.reactive.function.client.*;
-import org.telegram.telegrambots.meta.api.objects.*;
-import reactor.core.publisher.*;
+import com.system205.entity.TelegramUser;
+import com.system205.telegram.dto.TelegramAuthResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Optional;
 
-@Component
 @Slf4j
+@Component
 public class GetPasswordMessageProcessor implements MessageProcessor {
     private final WebClient webClient;
     private final String uri;

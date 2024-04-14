@@ -1,29 +1,34 @@
 package com.system205.telegram;
 
 
-import com.system205.entity.*;
-import com.system205.kafka.*;
-import com.system205.service.*;
-import com.system205.telegram.dto.*;
-import com.system205.telegram.exceptions.*;
-import com.system205.telegram.message.*;
-import com.system205.telegram.util.*;
-import jakarta.annotation.*;
-import lombok.extern.slf4j.*;
-import org.springframework.beans.factory.annotation.*;
-import org.springframework.scheduling.annotation.*;
-import org.springframework.stereotype.*;
-import org.telegram.telegrambots.bots.*;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.*;
-import org.telegram.telegrambots.meta.api.methods.send.*;
-import org.telegram.telegrambots.meta.api.objects.*;
-import org.telegram.telegrambots.meta.api.objects.chatmember.*;
-import org.telegram.telegrambots.meta.exceptions.*;
+import com.system205.entity.TelegramUser;
+import com.system205.kafka.KafkaService;
+import com.system205.service.TelegramUserService;
+import com.system205.telegram.dto.TelegramUserUpdate;
+import com.system205.telegram.exceptions.SendMessageException;
+import com.system205.telegram.message.MessageProcessor;
+import com.system205.telegram.util.Utils;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.ChatMemberUpdated;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.*;
+import java.util.List;
 
-@Component
 @Slf4j
+@Component
 @EnableScheduling
 public final class Bot extends TelegramLongPollingBot {
     private static final String MARKDOWN = "MarkdownV2";

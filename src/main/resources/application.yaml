@@ -30,3 +30,7 @@ spring:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+server:
+  port: 8081
+web-client:
+  base-url: http://localhost:8080

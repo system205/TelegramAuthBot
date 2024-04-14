@@ -1,10 +1,16 @@
 package com.system205.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.telegram.telegrambots.meta.api.objects.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.User;
 
-import java.util.*;
+import java.util.Objects;
 
 @Entity
 @Getter

@@ -21,7 +21,7 @@ public class TelegramAuthBotApplication {
 
     @Bean
     CommandLineRunner commandLineRunner(ApplicationContext context) {
-        return (String... args)-> {
+        return (String... args) -> {
             try {
                 TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
                 botsApi.registerBot(context.getBean(LongPollingBot.class));
