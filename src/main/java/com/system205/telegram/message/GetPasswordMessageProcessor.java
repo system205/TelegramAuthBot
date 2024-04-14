@@ -50,7 +50,7 @@ public class GetPasswordMessageProcessor implements MessageProcessor {
                 .map(s -> "Here is your password: " + s.password())
                 .or(() -> Optional.of("Sorry. We can't obtain your password. "));
         } catch (WebClientRequestException e) {
-            log.error("User {} wants password. Can't connect to /{}. Details: {}",
+            log.error("User {} wants password. Can't connect to {}. Details: {}",
                 user.getUserName(), uri, e.getMessage());
             return Optional.of("Sorry, the server is down. Try later");
         }
