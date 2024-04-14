@@ -11,3 +11,11 @@ Kafka is used to apply TelegramUserUpdates:
 2. If a user is old and bot noticed some changes in user info the update has old and new TelegramUser to be different in some attributes. 
 
 - Bot checks user changes (username, for example) periodically and before each external call (for example, /get_password, not implemented yet) to send only the relevant information about the user.
+
+# Features
+
+1. On /get_password [GetPasswordMessageProcessor](src/main/java/com/system205/telegram/message/GetPasswordMessageProcessor.java) does the following:
+   - Sends POST request to `/api/telegram/auth` of specified auth server.
+   - Passes [TelegramUser](src/main/java/com/system205/entity/TelegramUser.java) in body.
+   - Awaits for OK status and returns the password
+   - Otherwise, outputs negatively (can't register, for example)

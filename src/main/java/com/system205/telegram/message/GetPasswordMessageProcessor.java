@@ -20,7 +20,7 @@ public class GetPasswordMessageProcessor implements MessageProcessor {
     private final String uri;
 
     public GetPasswordMessageProcessor(WebClient webClient,
-                                       @Value("${web-client.uri.get-password:api/telegram/auth}") String uri) {
+                                       @Value("${web-client.uri.get-password:/api/telegram/auth}") String uri) {
         this.webClient = webClient;
         this.uri = uri;
     }
